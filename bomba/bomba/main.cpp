@@ -1,21 +1,29 @@
-﻿// Prog35.cpp : ÄÜ¼Ö ÀÀ¿ë ÇÁ·Î±×·¥¿¡ ´ëÇÑ ÁøÀÔÁ¡À» Á¤ÀÇÇÕ´Ï´Ù.
+﻿// Prog35.cpp : 콘솔 응용 프로그램에 대한 진입점을 정의합니다.
 //
 
 #include <math.h>
 #include <glut.h>
-#include <Windows.h>
-#include <mmsystem.h>	
-#include <Digitalv.h>
-#include <tchar.h>
-#include <string.h>
-#pragma comment(lib, "winmm.lib")
-
-#define SOUND_FILE_NAME ".\\bgm.wav"
-
 
 // ---------------------------------------------------------------------------------------------
 // Type definition
 // ---------------------------------------------------------------------------------------------
+#define TYPE_BODY 0
+#define TYPE_HEAD 1
+#define TYPE_BIG_JOINTS 2
+#define TYPE_LEFT_LOWER_ARM 3
+#define TYPE_ELBOW_JOINTS 4
+#define TYPE_LEFT_UPPER_ARM 5
+#define TYPE_PALM 6
+
+#define TYPE_RIGHT_LOWER_ARM 7
+#define TYPE_RIGHT_UPPER_ARM 8
+
+#define TYPE_LEG_KNEE_JOINTS 9
+#define TYPE_UPPER_LEG 10
+#define TYPE_LOWER_LEG 11
+
+
+
 
 typedef struct _action
 {
@@ -31,11 +39,13 @@ typedef struct _object
 	GLubyte*        indices;     // index
 	int             nums;        // number of vertices
 	GLfloat         theta[3];    // rotation parameter (x, y, z)
-	GLfloat         trans[3];		 // translation parameter
+	GLfloat         trans[3];    // translation parameter
 
 	Action*         action;
 	int             action_idx;
 	int             action_counter;
+
+	int type;
 
 	struct _object* next;
 	struct _object* child;
@@ -112,9 +122,14 @@ Action action4[] = {
 // Objects
 // ---------------------------------------------------------------------------------------------
 
-Object top, sb1, sb2, sb3;
-Viewer v;
+Object top, head;
+Object left_shoulder_joints, left_lower_arm, left_elbow_joints, left_upper_arm, left_palm;
+Object right_shoulder_joints, right_lower_arm, right_elbow_joints, right_upper_arm, right_palm;
+Object left_leg_joints, left_upper_leg, left_knee_joints, left_lower_leg;
+Object right_leg_joints, right_upper_leg, right_knee_joints, right_lower_leg;
 
+Viewer v;
+GLUquadricObj *t;
 int    play = 0;
 
 // ---------------------------------------------------------------------------------------------
@@ -127,13 +142,271 @@ void init()
 	glLoadIdentity();
 
 	glClearColor(1.0, 1.0, 1.0, 1.0);
-	glOrtho(-2.0, 2.0, -2.0, 2.0, -10.0, 10.0);
+	glOrtho(-3.0, 3.0, -3.0, 3.0, -10.0, 10.0);
 	glEnable(GL_DEPTH_TEST);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
 
+void init_left_arm() {
+	left_shoulder_joints.vertices = &vertices2[0][0];
+	left_shoulder_joints.colors = &colors2[0][0];
+	left_shoulder_joints.indices = &indices2[0];
+	left_shoulder_joints.nums = 24;
+	left_shoulder_joints.theta[0] = left_shoulder_joints.theta[1] = left_shoulder_joints.theta[2] = 0;
+	left_shoulder_joints.trans[0] = -0.4;
+	left_shoulder_joints.trans[1] = 1.20;
+	left_shoulder_joints.trans[2] = 0;
+	left_shoulder_joints.type = TYPE_BIG_JOINTS;
+
+	//left_shoulder_joints.action         = &action3[0];
+	left_shoulder_joints.action_idx = 0;
+	left_shoulder_joints.action_counter = 0;
+
+	left_shoulder_joints.next = &right_shoulder_joints;
+	left_shoulder_joints.child = &left_lower_arm;
+
+	//left_lower_arm
+	left_lower_arm.vertices = &vertices3[0][0];
+	left_lower_arm.colors = &colors3[0][0];
+	left_lower_arm.indices = &indices3[0];
+	left_lower_arm.nums = 24;
+	left_lower_arm.theta[0] = left_lower_arm.theta[1] = left_lower_arm.theta[2] = 0;
+	left_lower_arm.trans[0] = -0.1;
+	left_lower_arm.trans[1] = 0;
+	left_lower_arm.trans[2] = 0;
+	left_lower_arm.type = TYPE_LEFT_LOWER_ARM;
+
+	left_lower_arm.action = &action4[0];
+	left_lower_arm.action_idx = 0;
+	left_lower_arm.action_counter = 0;
+
+	left_lower_arm.next = 0;
+	left_lower_arm.child = &left_elbow_joints;
+
+	//left_elbow_joints
+	left_elbow_joints.theta[0] = left_lower_arm.theta[1] = left_lower_arm.theta[2] = 0;
+	left_elbow_joints.trans[0] = -0.7;
+	left_elbow_joints.trans[1] = 0;
+	left_elbow_joints.trans[2] = 0;
+	left_elbow_joints.type = TYPE_ELBOW_JOINTS;
+
+	left_elbow_joints.next = 0;
+	left_elbow_joints.child = 0;
+
+	left_elbow_joints.theta[0] = left_lower_arm.theta[1] = left_lower_arm.theta[2] = 0;
+	left_elbow_joints.trans[0] = -0.7;
+	left_elbow_joints.trans[1] = 0;
+	left_elbow_joints.trans[2] = 0;
+	left_elbow_joints.type = TYPE_ELBOW_JOINTS;
+
+	left_elbow_joints.next = 0;
+	left_elbow_joints.child = &left_upper_arm;
+
+	//left_upper_arm
+	left_upper_arm.theta[0] = left_lower_arm.theta[1] = left_lower_arm.theta[2] = 0;
+	left_upper_arm.trans[0] = -0.1;
+	left_upper_arm.trans[1] = 0;
+	left_upper_arm.trans[2] = 0;
+	left_upper_arm.type = TYPE_LEFT_UPPER_ARM;
+
+	left_upper_arm.next = 0;
+	left_upper_arm.child = &left_palm;
+
+	left_palm.theta[0] = left_lower_arm.theta[1] = left_lower_arm.theta[2] = 0;
+	left_palm.trans[0] = -0.45;
+	left_palm.trans[1] = 0;
+	left_palm.trans[2] = 0;
+	left_palm.type = TYPE_PALM;
+
+	left_palm.next = 0;
+	left_palm.child = 0;
+}
+void init_right_arm() {
+	right_shoulder_joints.vertices = &vertices2[0][0];
+	right_shoulder_joints.colors = &colors2[0][0];
+	right_shoulder_joints.indices = &indices2[0];
+	right_shoulder_joints.nums = 24;
+	right_shoulder_joints.theta[0] = right_shoulder_joints.theta[1] = right_shoulder_joints.theta[2] = 0;
+	right_shoulder_joints.trans[0] = 0.4;
+	right_shoulder_joints.trans[1] = 1.2;
+	right_shoulder_joints.trans[2] = 0;
+	right_shoulder_joints.type = TYPE_BIG_JOINTS;
+
+	//right_shoulder_joints.action         = &action3[0];
+	right_shoulder_joints.action_idx = 0;
+	right_shoulder_joints.action_counter = 0;
+
+	right_shoulder_joints.next = &left_leg_joints;
+	right_shoulder_joints.child = &right_lower_arm;
+
+	//right_lower_arm
+	right_lower_arm.vertices = &vertices3[0][0];
+	right_lower_arm.colors = &colors3[0][0];
+	right_lower_arm.indices = &indices3[0];
+	right_lower_arm.nums = 24;
+	right_lower_arm.theta[0] = right_lower_arm.theta[1] = right_lower_arm.theta[2] = 0;
+	right_lower_arm.trans[0] = 0.1;
+	right_lower_arm.trans[1] = 0;
+	right_lower_arm.trans[2] = 0;
+	right_lower_arm.type = TYPE_RIGHT_LOWER_ARM;
+
+	right_lower_arm.action = &action4[0];
+	right_lower_arm.action_idx = 0;
+	right_lower_arm.action_counter = 0;
+
+	right_lower_arm.next = 0;
+	right_lower_arm.child = &right_elbow_joints;
+
+	//right_elbow_joints
+	right_elbow_joints.theta[0] = right_lower_arm.theta[1] = right_lower_arm.theta[2] = 0;
+	right_elbow_joints.trans[0] = 0.7;
+	right_elbow_joints.trans[1] = 0;
+	right_elbow_joints.trans[2] = 0;
+	right_elbow_joints.type = TYPE_ELBOW_JOINTS;
+
+	right_elbow_joints.next = 0;
+	right_elbow_joints.child = 0;
+
+	right_elbow_joints.theta[0] = right_lower_arm.theta[1] = right_lower_arm.theta[2] = 0;
+	right_elbow_joints.trans[0] = 0.7;
+	right_elbow_joints.trans[1] = 0;
+	right_elbow_joints.trans[2] = 0;
+	right_elbow_joints.type = TYPE_ELBOW_JOINTS;
+
+	right_elbow_joints.next = 0;
+	right_elbow_joints.child = &right_upper_arm;
+
+	//right_upper_arm
+	right_upper_arm.theta[0] = right_lower_arm.theta[1] = right_lower_arm.theta[2] = 0;
+	right_upper_arm.trans[0] = 0.1;
+	right_upper_arm.trans[1] = 0;
+	right_upper_arm.trans[2] = 0;
+	right_upper_arm.type = TYPE_RIGHT_UPPER_ARM;
+
+	right_upper_arm.next = 0;
+	right_upper_arm.child = &right_palm;
+
+	right_palm.theta[0] = right_lower_arm.theta[1] = right_lower_arm.theta[2] = 0;
+	right_palm.trans[0] = 0.45;
+	right_palm.trans[1] = 0;
+	right_palm.trans[2] = 0;
+	right_palm.type = TYPE_PALM;
+
+	right_palm.next = 0;
+	right_palm.child = 0;
+}
+void init_left_leg() {
+
+	left_leg_joints.theta[0] = left_shoulder_joints.theta[1] = left_shoulder_joints.theta[2] = 0;
+	left_leg_joints.trans[0] = -0.32;
+	left_leg_joints.trans[1] = 0.1;
+	left_leg_joints.trans[2] = 0;
+	left_leg_joints.type = TYPE_LEG_KNEE_JOINTS;
+
+	//left_shoulder_joints.action         = &action3[0];
+	left_leg_joints.action_idx = 0;
+	left_leg_joints.action_counter = 0;
+
+	left_leg_joints.next = &right_leg_joints;
+	left_leg_joints.child = &left_upper_leg;
+
+	//--
+
+	left_upper_leg.theta[0] = left_upper_leg.theta[1] = left_upper_leg.theta[2] = 0;
+	left_upper_leg.trans[0] = 0;
+	left_upper_leg.trans[1] = 0;
+	left_upper_leg.trans[2] = 0;
+	left_upper_leg.type = TYPE_UPPER_LEG;
+
+	//left_shoulder_joints.action         = &action3[0];
+	left_upper_leg.action_idx = 0;
+	left_upper_leg.action_counter = 0;
+
+	left_upper_leg.next = 0;
+	left_upper_leg.child = &left_knee_joints;
+
+	left_knee_joints.theta[0] = left_knee_joints.theta[1] = left_knee_joints.theta[2] = 0;
+	left_knee_joints.trans[0] = 0;
+	left_knee_joints.trans[1] = -0.7;
+	left_knee_joints.trans[2] = 0;
+	left_knee_joints.type = TYPE_LEG_KNEE_JOINTS;
+
+	left_knee_joints.action_idx = 0;
+	left_knee_joints.action_counter = 0;
+
+	left_knee_joints.next = 0;
+	left_knee_joints.child = &left_lower_leg;
+
+	//---
+	left_lower_leg.theta[0] = left_lower_leg.theta[1] = left_lower_leg.theta[2] = 0;
+	left_lower_leg.trans[0] = 0;
+	left_lower_leg.trans[1] = 0;
+	left_lower_leg.trans[2] = 0;
+	left_lower_leg.type = TYPE_LOWER_LEG;
+
+	left_lower_leg.action_idx = 0;
+	left_lower_leg.action_counter = 0;
+
+	left_lower_leg.next = 0;
+	left_lower_leg.child = 0;
+}
+void init_right_leg() {
+
+	right_leg_joints.theta[0] = right_shoulder_joints.theta[1] = right_shoulder_joints.theta[2] = 0;
+	right_leg_joints.trans[0] = 0.32;
+	right_leg_joints.trans[1] = 0.1;
+	right_leg_joints.trans[2] = 0;
+	right_leg_joints.type = TYPE_LEG_KNEE_JOINTS;
+
+	//right_shoulder_joints.action         = &action3[0];
+	right_leg_joints.action_idx = 0;
+	right_leg_joints.action_counter = 0;
+
+	right_leg_joints.next = 0;
+	right_leg_joints.child = &right_upper_leg;
+
+	//--
+
+	right_upper_leg.theta[0] = right_upper_leg.theta[1] = right_upper_leg.theta[2] = 0;
+	right_upper_leg.trans[0] = 0;
+	right_upper_leg.trans[1] = 0;
+	right_upper_leg.trans[2] = 0;
+	right_upper_leg.type = TYPE_UPPER_LEG;
+
+	//right_shoulder_joints.action         = &action3[0];
+	right_upper_leg.action_idx = 0;
+	right_upper_leg.action_counter = 0;
+
+	right_upper_leg.next = 0;
+	right_upper_leg.child = &right_knee_joints;
+
+	right_knee_joints.theta[0] = right_knee_joints.theta[1] = right_knee_joints.theta[2] = 0;
+	right_knee_joints.trans[0] = 0;
+	right_knee_joints.trans[1] = -0.7;
+	right_knee_joints.trans[2] = 0;
+	right_knee_joints.type = TYPE_LEG_KNEE_JOINTS;
+
+	right_knee_joints.action_idx = 0;
+	right_knee_joints.action_counter = 0;
+
+	right_knee_joints.next = 0;
+	right_knee_joints.child = &right_lower_leg;
+
+	//---
+	right_lower_leg.theta[0] = right_lower_leg.theta[1] = right_lower_leg.theta[2] = 0;
+	right_lower_leg.trans[0] = 0;
+	right_lower_leg.trans[1] = 0;
+	right_lower_leg.trans[2] = 0;
+	right_lower_leg.type = TYPE_LOWER_LEG;
+
+	right_lower_leg.action_idx = 0;
+	right_lower_leg.action_counter = 0;
+
+	right_lower_leg.next = 0;
+	right_lower_leg.child = 0;
+}
 void init_object()
 {
 	// object initialization
@@ -144,60 +417,41 @@ void init_object()
 	top.theta[0] = top.theta[1] = top.theta[2] = 0;
 	top.trans[0] = top.trans[1] = top.trans[2] = 0;
 
-	//top.action = &action1[0];
+	top.action = &action1[0];
 	top.action_idx = 0;
 	top.action_counter = 0;
+	top.type = TYPE_BODY;
 
 	top.next = 0;
-	top.child = &sb1;
+	top.child = &head;
 
-	sb1.vertices = &vertices2[0][0];
-	sb1.colors = &colors2[0][0];
-	sb1.indices = &indices2[0];
-	sb1.nums = 24;
-	sb1.theta[0] = sb1.theta[1] = sb1.theta[2] = 0;
-	sb1.trans[0] = 0;
-	sb1.trans[1] = 1.0;
-	sb1.trans[2] = 0;
+	head.vertices = &vertices2[0][0];
+	head.colors   = &colors2  [0][0];
+	head.indices  = &indices2 [0];
+	head.nums     = 24;
+	head.theta[0] = head.theta[1] = head.theta[2] = 0;
+	head.trans[0] = 0;
+	head.trans[1] = 1.55;
+	head.trans[2] = 0;
+	head.type = TYPE_HEAD;
 
-	//sb1.action = &action2[0];
-	sb1.action_idx = 0;
-	sb1.action_counter = 0;
+	head.action         = &action2[0];
+	head.action_idx     = 0;
+	head.action_counter = 0;
 
-	sb1.next = &sb2;
-	sb1.child = 0;
+	head.next     = &left_shoulder_joints;
+	head.child    = 0;
 
-	sb2.vertices = &vertices2[0][0];
-	sb2.colors = &colors2[0][0];
-	sb2.indices = &indices2[0];
-	sb2.nums = 24;
-	sb2.theta[0] = sb1.theta[1] = sb1.theta[2] = 0;
-	sb2.trans[0] = 0;
-	sb2.trans[1] = -1.0;
-	sb2.trans[2] = 0;
+	init_left_arm();
+	init_right_arm();
+	init_left_leg();
+	init_right_leg();
 
-	sb2.action = &action3[0];
-	sb2.action_idx = 0;
-	sb2.action_counter = 0;
 
-	sb2.next = 0;
-	sb2.child = &sb3;
 
-	sb3.vertices = &vertices3[0][0];
-	sb3.colors = &colors3[0][0];
-	sb3.indices = &indices3[0];
-	sb3.nums = 24;
-	sb3.theta[0] = sb3.theta[1] = sb3.theta[2] = 0;
-	sb3.trans[0] = 0.8;
-	sb3.trans[1] = 0;
-	sb3.trans[2] = 0;
-
-	sb3.action = &action4[0];
-	sb3.action_idx = 0;
-	sb3.action_counter = 0;
-
-	sb3.next = 0;
-	sb3.child = 0;
+	t = gluNewQuadric();
+	gluQuadricDrawStyle(t, GLU_FILL);
+	gluQuadricNormals(t, GLU_SMOOTH);
 }
 
 void spin()
@@ -273,10 +527,91 @@ void draw(Object* p)
 	glRotatef(p->theta[2], 0.0, 0.0, 1.0);
 
 	// draw
+	if (p->type == TYPE_BODY) {
+		glPushMatrix();
+		glRotatef(-90.0, 1, 0, 0);
+		glColor3f(1, 0, 0);
+		gluCylinder(t, 0.3, 0.4, 1.4, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_HEAD) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glutSolidSphere(0.3, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_BIG_JOINTS) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glutSolidSphere(0.2, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_LEFT_LOWER_ARM) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glRotatef(-90.0, 0, 1, 0);
+		gluCylinder(t, 0.14, 0.13, 0.8, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_RIGHT_LOWER_ARM) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glRotatef(90.0, 0, 1, 0);
+		gluCylinder(t, 0.14, 0.13, 0.8, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_ELBOW_JOINTS) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glutSolidSphere(0.18, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_LEFT_UPPER_ARM) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glRotatef(-90.0, 0, 1, 0);
+		gluCylinder(t, 0.12, 0.11, 0.4, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_RIGHT_UPPER_ARM) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glRotatef(90.0, 0, 1, 0);
+		gluCylinder(t, 0.12, 0.11, 0.4, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_PALM) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glutSolidSphere(0.17, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_LEG_KNEE_JOINTS) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glutSolidSphere(0.2, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_UPPER_LEG) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glRotatef(90.0, 1, 0, 0);
+		gluCylinder(t, 0.14, 0.13, 0.8, 10, 10);
+		glPopMatrix();
+	}
+	else if (p->type == TYPE_LOWER_LEG) {
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glRotatef(90.0, 1, 0, 0);
+		gluCylinder(t, 0.12, 0.18, 0.7, 10, 10);
+		glPopMatrix();
+	}
+
+	else {
 	glVertexPointer(3, GL_FLOAT, 0, p->vertices);
 	glColorPointer(3, GL_FLOAT, 0, p->colors);
 	glDrawElements(GL_QUADS, p->nums, GL_UNSIGNED_BYTE, p->indices);
-
+	}
 	// apply action
 	if (play) action(p);
 
@@ -309,26 +644,6 @@ void display()
 
 int main(int argc, char* argv[])
 {
-	//MCI_OPEN_PARMS m_mciOpenParms;
-	//MCI_PLAY_PARMS m_mciPlayParms;
-	//DWORD m_dwDeviceID;
-	//MCI_OPEN_PARMS mciOpen;
-	//MCI_PLAY_PARMS mciPlay;
-
-	//int dwID;
-
-	////PlaySound(TEXT(SOUND_FILE_NAME), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
-	//mciOpen.lpstrElementName = L".\\bom.mp3"; // 파일 경로 입력
-	//mciOpen.lpstrDeviceType = L"mpegvideo";
-
-	//mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
-	//	(DWORD)(LPVOID)&mciOpen);
-
-	//dwID = mciOpen.wDeviceID;
-
-	//mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, // play & repeat
-	//	(DWORD)(LPVOID)&m_mciPlayParms);
-
 	// GLUT initialization
 	glutInit(&argc, (char**)argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
