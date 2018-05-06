@@ -3,6 +3,12 @@
 
 #include <math.h>
 #include <glut.h>
+#include <Windows.h>
+#include <mmsystem.h>	
+#include <Digitalv.h>
+#pragma comment(lib, "winmm.lib")
+
+#define SOUND_FILE_NAME ".\\bgm.wav"
 
 // ---------------------------------------------------------------------------------------------
 // Type definition
@@ -21,8 +27,6 @@
 #define TYPE_LEG_KNEE_JOINTS 9
 #define TYPE_UPPER_LEG 10
 #define TYPE_LOWER_LEG 11
-
-
 
 
 typedef struct _action
@@ -61,68 +65,130 @@ typedef struct _viewer
 // ---------------------------------------------------------------------------------------------
 // Data
 // ---------------------------------------------------------------------------------------------
-
-// array 1 (top)
-GLfloat vertices1[][3] = { { -0.2,-1.0,-0.2 },{ 0.2,-1.0,-0.2 },{ 0.2,1.0,-0.2 },{ -0.2,1.0,-0.2 },
-{ -0.2,-1.0, 0.2 },{ 0.2,-1.0, 0.2 },{ 0.2,1.0, 0.2 },{ -0.2,1.0, 0.2 } };
-GLfloat colors1[][3] = { { 0.0, 0.0, 0.0 },{ 1.0, 0.0, 0.0 },{ 1.0,1.0, 0.0 },{ 0.0,1.0, 0.0 },
-{ 0.0, 0.0, 1.0 },{ 1.0, 0.0, 1.0 },{ 1.0,1.0, 1.0 },{ 0.0,1.0, 1.0 } };
-GLubyte indices1[] = { 0,3,2,1, 2,3,7,6, 0,4,7,3, 1,2,6,5, 4,5,6,7, 0,1,5,4 };
-
-// array 2 (sb1, sb2)
-GLfloat vertices2[][3] = { { -0.8,-0.1,-0.1 },{ 0.8,-0.1,-0.1 },{ 0.8,0.1,-0.1 },{ -0.8,0.1,-0.1 },
-{ -0.8,-0.1, 0.1 },{ 0.8,-0.1, 0.1 },{ 0.8,0.1, 0.1 },{ -0.8,0.1, 0.1 } };
-GLfloat colors2[][3] = { { 0.0, 0.0, 0.0 },{ 1.0, 0.0, 0.0 },{ 1.0,1.0, 0.0 },{ 0.0,1.0, 0.0 },
-{ 0.0, 0.0, 1.0 },{ 1.0, 0.0, 1.0 },{ 1.0,1.0, 1.0 },{ 0.0,1.0, 1.0 } };
-GLubyte indices2[] = { 0,3,2,1, 2,3,7,6, 0,4,7,3, 1,2,6,5, 4,5,6,7, 0,1,5,4 };
-
-// array 2 (sb3)
-GLfloat vertices3[][3] = { { -0.1,-0.4,-0.1 },{ 0.1,-0.4,-0.1 },{ 0.1,0.4,-0.1 },{ -0.1,0.4,-0.1 },
-{ -0.1,-0.4, 0.1 },{ 0.1,-0.4, 0.1 },{ 0.1,0.4, 0.1 },{ -0.1,0.4, 0.1 } };
-GLfloat colors3[][3] = { { 0.0, 0.0, 0.0 },{ 1.0, 0.0, 0.0 },{ 1.0,1.0, 0.0 },{ 0.0,1.0, 0.0 },
-{ 0.0, 0.0, 1.0 },{ 1.0, 0.0, 1.0 },{ 1.0,1.0, 1.0 },{ 0.0,1.0, 1.0 } };
-GLubyte indices3[] = { 0,3,2,1, 2,3,7,6, 0,4,7,3, 1,2,6,5, 4,5,6,7, 0,1,5,4 };
+GLfloat mat_specular[] = { 0.0, 0.0, 1.0, 1.0 };
+GLfloat mat_diffuse[] = { 0.0, 0.0, 1.0, 1.0 };
+GLfloat mat_ambient[] = { 0.0, 0.0, 1.0, 1.0 };
+GLfloat mat_shininess = { 100.0 };
 
 // actions
-Action action1[] = {
-	{ 'T', 30, -0.5,   0,   0 },
-	{ 'T', 30, +0.5,   0,   0 },
-	{ 'R', 60,    0, 720,   0 },
-	{ 'N',180,    0,   0,   0 },
-	{ 'R', 30,    0,   0,  30 },
-	{ 'R', 60,    0, 720,   0 },
+
+Action body_action[] = {
+	{ 'N', 110,   0, 0,   0 },
+	{ 'R', 100, 0, 50, 0},
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -100, 0 },
+	{ 'R', 25, 0, 100, 0 },
+
+
+
+
+	
+
 	{ 'F',  0,    0,   0,   0 }
 };
 
-Action action2[] = {
-	{ 'N',120,    0,   0,   0 },
-	{ 'R', 60,    0, 720,   0 },
-	{ 'N',150,    0,   0,   0 },
-	{ 'R', 60,    0, 720,   0 },
+Action left_shoulder_joints_action[] = {
+	{ 'R', 30,    0, 0,   -90 },
 	{ 'F',  0,    0,   0,   0 }
 };
 
-Action action3[] = {
-	{ 'N',180,    0,   0,   0 },
-	{ 'R', 60,    0,-720,   0 },
-	{ 'N', 90,    0,   0,   0 },
-	{ 'R', 60,    0, 720,   0 },
+Action left_elbow_joints_action[] = {
+	{ 'N', 100,   0, 0,   0 },
+	{ 'R',  10,    0,   0,   45 },
+	{ 'R', 1000, 7200, 0, 0},
+	{ 'F',  0,    0,   0,   0 },
+};
+
+Action right_shoulder_joints_action[] = {
+	{ 'R', 30,    0, 0,   -90 },
+	{ 'N', 100,   0, 0,   0 },
+	{ 'R', 30,   0, 0,   50 },
 	{ 'F',  0,    0,   0,   0 }
 };
 
-Action action4[] = {
-	{ 'N',240,    0,   0,   0 },
-	{ 'R', 60,  720,   0,   0 },
-	{ 'N', 30,    0,   0,   0 },
-	{ 'R', 60,    0, 720,   0 },
+Action right_elbow_joints_action[] = {
+	{ 'N', 130,   0, 0,   0 },
+	{ 'R', 30,   0, 0,   -90 },
 	{ 'F',  0,    0,   0,   0 }
 };
+
+Action left_leg_joints_action[] = {
+	{ 'R', 30,    0, 0,   -10 },
+	
+	{ 'F',  0,    0,   0,   0 }
+};
+
+Action left_knee_joints_action[] = {
+	{ 'N', 130,   0, 0,   0 },
+	{ 'R', 30,    40, 0,   0 },
+	{ 'F',  0,    0,   0,   0 }
+};
+
+
+Action right_leg_joints_action[] = {
+	{ 'R',30,    0,   0,   10 },
+	{ 'N', 130,   0, 0,   0 },
+	{ 'R',30,    -30,   0,   0 },
+	{ 'F',  0,    0,   0,   0 }
+};
+
+Action right_knee_joints_action[] = {
+	{ 'N', 130,   0, 0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+
+	{ 'F',  0,    0,   0,   0 }
+
+	
+};
+
+
+
+//Action action4[] = {
+//	{ 'N',240,    0,   0,   0 },
+//	{ 'R', 60,  720,   0,   0 },
+//	{ 'N', 30,    0,   0,   0 },
+//	{ 'R', 60,    0, 720,   0 },
+//	{ 'F',  0,    0,   0,   0 }
+//};
 
 // ---------------------------------------------------------------------------------------------
 // Objects
 // ---------------------------------------------------------------------------------------------
 
-Object top, head;
+Object body, head;
 Object left_shoulder_joints, left_lower_arm, left_elbow_joints, left_upper_arm, left_palm;
 Object right_shoulder_joints, right_lower_arm, right_elbow_joints, right_upper_arm, right_palm;
 Object left_leg_joints, left_upper_leg, left_knee_joints, left_lower_leg;
@@ -132,12 +198,38 @@ Viewer v;
 GLUquadricObj *t;
 int    play = 0;
 
+//audio
+
+MCI_OPEN_PARMS m_mciOpenParms;
+MCI_PLAY_PARMS m_mciPlayParms;
+DWORD m_dwDeviceID;
+MCI_OPEN_PARMS mciOpen;
+MCI_PLAY_PARMS mciPlay;
+
+int dwID;
+
 // ---------------------------------------------------------------------------------------------
 // Functions
 // ---------------------------------------------------------------------------------------------
 
 void init()
 {
+	GLfloat light_ambient1[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat light_diffuse1[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_specular1[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light_position1[] = { 10.0, 10.0, 10.0, 0.0 };
+
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position1);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient1);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse1);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular1);
+
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+	glMaterialf(GL_FRONT, GL_SHININESS, mat_shininess);
+
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
@@ -147,20 +239,21 @@ void init()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	glShadeModel(GL_SMOOTH);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT2);
+	glEnable(GL_COLOR_MATERIAL);
 }
 
 void init_left_arm() {
-	left_shoulder_joints.vertices = &vertices2[0][0];
-	left_shoulder_joints.colors = &colors2[0][0];
-	left_shoulder_joints.indices = &indices2[0];
-	left_shoulder_joints.nums = 24;
 	left_shoulder_joints.theta[0] = left_shoulder_joints.theta[1] = left_shoulder_joints.theta[2] = 0;
 	left_shoulder_joints.trans[0] = -0.4;
 	left_shoulder_joints.trans[1] = 1.20;
 	left_shoulder_joints.trans[2] = 0;
 	left_shoulder_joints.type = TYPE_BIG_JOINTS;
 
-	//left_shoulder_joints.action         = &action3[0];
+	left_shoulder_joints.action = &left_shoulder_joints_action[0];
 	left_shoulder_joints.action_idx = 0;
 	left_shoulder_joints.action_counter = 0;
 
@@ -168,9 +261,6 @@ void init_left_arm() {
 	left_shoulder_joints.child = &left_lower_arm;
 
 	//left_lower_arm
-	left_lower_arm.vertices = &vertices3[0][0];
-	left_lower_arm.colors = &colors3[0][0];
-	left_lower_arm.indices = &indices3[0];
 	left_lower_arm.nums = 24;
 	left_lower_arm.theta[0] = left_lower_arm.theta[1] = left_lower_arm.theta[2] = 0;
 	left_lower_arm.trans[0] = -0.1;
@@ -178,7 +268,7 @@ void init_left_arm() {
 	left_lower_arm.trans[2] = 0;
 	left_lower_arm.type = TYPE_LEFT_LOWER_ARM;
 
-	left_lower_arm.action = &action4[0];
+	//left_lower_arm.action = &action4[0];
 	left_lower_arm.action_idx = 0;
 	left_lower_arm.action_counter = 0;
 
@@ -191,6 +281,10 @@ void init_left_arm() {
 	left_elbow_joints.trans[1] = 0;
 	left_elbow_joints.trans[2] = 0;
 	left_elbow_joints.type = TYPE_ELBOW_JOINTS;
+	
+	left_elbow_joints.action = &left_elbow_joints_action[0];
+	left_elbow_joints.action_idx = 0;
+	left_elbow_joints.action_counter = 0;
 
 	left_elbow_joints.next = 0;
 	left_elbow_joints.child = 0;
@@ -224,9 +318,7 @@ void init_left_arm() {
 	left_palm.child = 0;
 }
 void init_right_arm() {
-	right_shoulder_joints.vertices = &vertices2[0][0];
-	right_shoulder_joints.colors = &colors2[0][0];
-	right_shoulder_joints.indices = &indices2[0];
+
 	right_shoulder_joints.nums = 24;
 	right_shoulder_joints.theta[0] = right_shoulder_joints.theta[1] = right_shoulder_joints.theta[2] = 0;
 	right_shoulder_joints.trans[0] = 0.4;
@@ -234,7 +326,7 @@ void init_right_arm() {
 	right_shoulder_joints.trans[2] = 0;
 	right_shoulder_joints.type = TYPE_BIG_JOINTS;
 
-	//right_shoulder_joints.action         = &action3[0];
+	right_shoulder_joints.action = &right_shoulder_joints_action[0];
 	right_shoulder_joints.action_idx = 0;
 	right_shoulder_joints.action_counter = 0;
 
@@ -242,9 +334,7 @@ void init_right_arm() {
 	right_shoulder_joints.child = &right_lower_arm;
 
 	//right_lower_arm
-	right_lower_arm.vertices = &vertices3[0][0];
-	right_lower_arm.colors = &colors3[0][0];
-	right_lower_arm.indices = &indices3[0];
+
 	right_lower_arm.nums = 24;
 	right_lower_arm.theta[0] = right_lower_arm.theta[1] = right_lower_arm.theta[2] = 0;
 	right_lower_arm.trans[0] = 0.1;
@@ -252,7 +342,7 @@ void init_right_arm() {
 	right_lower_arm.trans[2] = 0;
 	right_lower_arm.type = TYPE_RIGHT_LOWER_ARM;
 
-	right_lower_arm.action = &action4[0];
+	/*right_lower_arm.action = &action4[0];*/
 	right_lower_arm.action_idx = 0;
 	right_lower_arm.action_counter = 0;
 
@@ -265,6 +355,10 @@ void init_right_arm() {
 	right_elbow_joints.trans[1] = 0;
 	right_elbow_joints.trans[2] = 0;
 	right_elbow_joints.type = TYPE_ELBOW_JOINTS;
+
+	right_elbow_joints.action = &right_elbow_joints_action[0];
+	right_elbow_joints.action_idx = 0;
+	right_elbow_joints.action_counter = 0;
 
 	right_elbow_joints.next = 0;
 	right_elbow_joints.child = 0;
@@ -299,13 +393,13 @@ void init_right_arm() {
 }
 void init_left_leg() {
 
-	left_leg_joints.theta[0] = left_shoulder_joints.theta[1] = left_shoulder_joints.theta[2] = 0;
+	left_leg_joints.theta[0] = left_leg_joints.theta[1] = left_leg_joints.theta[2] = 0;
 	left_leg_joints.trans[0] = -0.32;
 	left_leg_joints.trans[1] = 0.1;
 	left_leg_joints.trans[2] = 0;
 	left_leg_joints.type = TYPE_LEG_KNEE_JOINTS;
 
-	//left_shoulder_joints.action         = &action3[0];
+	left_leg_joints.action = &left_leg_joints_action[0];
 	left_leg_joints.action_idx = 0;
 	left_leg_joints.action_counter = 0;
 
@@ -333,6 +427,11 @@ void init_left_leg() {
 	left_knee_joints.trans[2] = 0;
 	left_knee_joints.type = TYPE_LEG_KNEE_JOINTS;
 
+
+	left_knee_joints.action = &left_knee_joints_action[0];
+	left_knee_joints.action_idx = 0;
+	left_knee_joints.action_counter = 0;
+
 	left_knee_joints.action_idx = 0;
 	left_knee_joints.action_counter = 0;
 
@@ -354,13 +453,13 @@ void init_left_leg() {
 }
 void init_right_leg() {
 
-	right_leg_joints.theta[0] = right_shoulder_joints.theta[1] = right_shoulder_joints.theta[2] = 0;
+	right_leg_joints.theta[0] = right_leg_joints.theta[1] = right_leg_joints.theta[2] = 0;
 	right_leg_joints.trans[0] = 0.32;
 	right_leg_joints.trans[1] = 0.1;
 	right_leg_joints.trans[2] = 0;
 	right_leg_joints.type = TYPE_LEG_KNEE_JOINTS;
 
-	//right_shoulder_joints.action         = &action3[0];
+	right_leg_joints.action = &right_leg_joints_action[0];
 	right_leg_joints.action_idx = 0;
 	right_leg_joints.action_counter = 0;
 
@@ -388,6 +487,8 @@ void init_right_leg() {
 	right_knee_joints.trans[2] = 0;
 	right_knee_joints.type = TYPE_LEG_KNEE_JOINTS;
 
+
+	right_knee_joints.action = &right_knee_joints_action[0];
 	right_knee_joints.action_idx = 0;
 	right_knee_joints.action_counter = 0;
 
@@ -410,37 +511,30 @@ void init_right_leg() {
 void init_object()
 {
 	// object initialization
-	top.vertices = &vertices1[0][0];
-	top.colors = &colors1[0][0];
-	top.indices = &indices1[0];
-	top.nums = 24;
-	top.theta[0] = top.theta[1] = top.theta[2] = 0;
-	top.trans[0] = top.trans[1] = top.trans[2] = 0;
+	body.nums = 24;
+	body.theta[0] = body.theta[1] = body.theta[2] = 0;
+	body.trans[0] = body.trans[1] = body.trans[2] = 0;
 
-	top.action = &action1[0];
-	top.action_idx = 0;
-	top.action_counter = 0;
-	top.type = TYPE_BODY;
+	body.action = &body_action[0];
+	body.action_idx = 0;
+	body.action_counter = 0;
+	body.type = TYPE_BODY;
 
-	top.next = 0;
-	top.child = &head;
+	body.next = 0;
+	body.child = &head;
 
-	head.vertices = &vertices2[0][0];
-	head.colors   = &colors2  [0][0];
-	head.indices  = &indices2 [0];
-	head.nums     = 24;
+	head.nums = 24;
 	head.theta[0] = head.theta[1] = head.theta[2] = 0;
 	head.trans[0] = 0;
 	head.trans[1] = 1.55;
 	head.trans[2] = 0;
 	head.type = TYPE_HEAD;
 
-	head.action         = &action2[0];
-	head.action_idx     = 0;
+	head.action_idx = 0;
 	head.action_counter = 0;
 
-	head.next     = &left_shoulder_joints;
-	head.child    = 0;
+	head.next = &left_shoulder_joints;
+	head.child = 0;
 
 	init_left_arm();
 	init_right_arm();
@@ -468,7 +562,11 @@ void keyboard_handler(unsigned char key, int x, int y)
 	if (key == 'x') v.eye[0] -= 0.1; if (key == 'X') v.eye[0] += 0.1;
 	if (key == 'y') v.eye[1] -= 0.1; if (key == 'Y') v.eye[1] += 0.1;
 	if (key == 'z') v.eye[2] -= 0.1; if (key == 'Z') v.eye[2] += 0.1;
-	if (key == 'p') play = 1 - play;
+	if (key == 'p') {
+		play = 1 - play;
+		mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, // play & repeat
+			(DWORD)(LPVOID)&m_mciPlayParms);
+	}
 	if (key == 'r')
 	{
 		play = 0;
@@ -490,6 +588,7 @@ void action(Object* p)
 	{
 		p->action_idx = 0;
 		p->action_counter = 0;
+		p->action = 0;
 		return;
 	}
 	if (p->action[p->action_idx].type == 'R')
@@ -538,6 +637,9 @@ void draw(Object* p)
 		glPushMatrix();
 		glColor3f(1, 0, 0);
 		glutSolidSphere(0.3, 10, 10);
+		glColor3f(1, 1, 0);
+		glRotatef(-90.0, 1, 0, 0);
+		glutSolidCone(0.27, 0.8, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_BIG_JOINTS) {
@@ -608,9 +710,9 @@ void draw(Object* p)
 	}
 
 	else {
-	glVertexPointer(3, GL_FLOAT, 0, p->vertices);
-	glColorPointer(3, GL_FLOAT, 0, p->colors);
-	glDrawElements(GL_QUADS, p->nums, GL_UNSIGNED_BYTE, p->indices);
+		glVertexPointer(3, GL_FLOAT, 0, p->vertices);
+		glColorPointer(3, GL_FLOAT, 0, p->colors);
+		glDrawElements(GL_QUADS, p->nums, GL_UNSIGNED_BYTE, p->indices);
 	}
 	// apply action
 	if (play) action(p);
@@ -630,12 +732,19 @@ void display()
 	// clear background
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+	glMaterialf(GL_FRONT, GL_SHININESS, mat_shininess);
+	glEnable(GL_LIGHT0);
+
+
 	// setup viewer
 	glLoadIdentity();
 	gluLookAt(v.eye[0], v.eye[1], v.eye[2], v.at[0], v.at[1], v.at[2], v.up[0], v.up[1], v.up[2]);
 
 	// draw
-	draw(&top);
+	draw(&body);
 
 	// flush & swap buffers
 	glFlush();
@@ -644,6 +753,16 @@ void display()
 
 int main(int argc, char* argv[])
 {
+
+	//PlaySound(TEXT(SOUND_FILE_NAME), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+	mciOpen.lpstrElementName = L".\\bom.mp3"; // 파일 경로 입력
+	mciOpen.lpstrDeviceType = L"mpegvideo";
+
+	mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
+		(DWORD)(LPVOID)&mciOpen);
+
+	dwID = mciOpen.wDeviceID;
+
 	// GLUT initialization
 	glutInit(&argc, (char**)argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
