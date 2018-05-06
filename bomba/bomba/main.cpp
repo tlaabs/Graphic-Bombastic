@@ -3,6 +3,15 @@
 
 #include <math.h>
 #include <glut.h>
+#include <Windows.h>
+#include <mmsystem.h>	
+#include <Digitalv.h>
+#include <tchar.h>
+#include <string.h>
+#pragma comment(lib, "winmm.lib")
+
+#define SOUND_FILE_NAME ".\\bgm.wav"
+
 
 // ---------------------------------------------------------------------------------------------
 // Type definition
@@ -135,7 +144,7 @@ void init_object()
 	top.theta[0] = top.theta[1] = top.theta[2] = 0;
 	top.trans[0] = top.trans[1] = top.trans[2] = 0;
 
-	top.action = &action1[0];
+	//top.action = &action1[0];
 	top.action_idx = 0;
 	top.action_counter = 0;
 
@@ -151,7 +160,7 @@ void init_object()
 	sb1.trans[1] = 1.0;
 	sb1.trans[2] = 0;
 
-	sb1.action = &action2[0];
+	//sb1.action = &action2[0];
 	sb1.action_idx = 0;
 	sb1.action_counter = 0;
 
@@ -300,6 +309,26 @@ void display()
 
 int main(int argc, char* argv[])
 {
+	//MCI_OPEN_PARMS m_mciOpenParms;
+	//MCI_PLAY_PARMS m_mciPlayParms;
+	//DWORD m_dwDeviceID;
+	//MCI_OPEN_PARMS mciOpen;
+	//MCI_PLAY_PARMS mciPlay;
+
+	//int dwID;
+
+	////PlaySound(TEXT(SOUND_FILE_NAME), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+	//mciOpen.lpstrElementName = L".\\bom.mp3"; // 파일 경로 입력
+	//mciOpen.lpstrDeviceType = L"mpegvideo";
+
+	//mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
+	//	(DWORD)(LPVOID)&mciOpen);
+
+	//dwID = mciOpen.wDeviceID;
+
+	//mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, // play & repeat
+	//	(DWORD)(LPVOID)&m_mciPlayParms);
+
 	// GLUT initialization
 	glutInit(&argc, (char**)argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
