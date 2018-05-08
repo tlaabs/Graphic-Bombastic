@@ -1,6 +1,7 @@
 ﻿// Prog35.cpp : 콘솔 응용 프로그램에 대한 진입점을 정의합니다.
 //
 
+#include <stdio.h>
 #include <math.h>
 #include <glut.h>
 #include <Windows.h>
@@ -28,6 +29,13 @@
 #define TYPE_UPPER_LEG 10
 #define TYPE_LOWER_LEG 11
 
+void timer(int t);
+static int delay = 10;
+float oldTimeSinceStart = 0;
+int sync_flag = 0;
+int sync_times = 0;
+float deltaTime = 0;
+float timess = 0;
 
 typedef struct _action
 {
@@ -73,8 +81,11 @@ GLfloat mat_shininess = { 100.0 };
 // actions
 
 Action body_action[] = {
-	{ 'N', 110,   0, 0,   0 },
-	{ 'R', 100, 0, 50, 0},
+	//Ready 460
+	{ 'N', 460,   0, 0,   0 },
+
+	//Dance1 650
+	{ 'R', 25, 0, 50, 0 },
 	{ 'R', 25, 0, -100, 0 },
 	{ 'R', 25, 0, 100, 0 },
 	{ 'R', 25, 0, -100, 0 },
@@ -99,62 +110,96 @@ Action body_action[] = {
 	{ 'R', 25, 0, 100, 0 },
 	{ 'R', 25, 0, -100, 0 },
 	{ 'R', 25, 0, 100, 0 },
+	{ 'R', 25, 0, -50, 0 },
 
 
 
-
-	
 
 	{ 'F',  0,    0,   0,   0 }
 };
 
 Action left_shoulder_joints_action[] = {
-	{ 'R', 30,    0, 0,   -90 },
+	//Ready 460
+	{ 'R', 1,    0, 0,   90 },
+	{ 'N', 320,   0, 0,   0 },
+	{ 'R', 20,   -180, 0,  0 },
+	{ 'N', 119,   0, 0,   0 },
+
+	//Dance1 650
+	{ 'R', 30,    0, 0,   -30 },
+	{ 'N', 620,   0, 0,   0 },
+
 	{ 'F',  0,    0,   0,   0 }
 };
 
 Action left_elbow_joints_action[] = {
-	{ 'N', 100,   0, 0,   0 },
-	{ 'R',  10,    0,   0,   45 },
-	{ 'R', 1000, 7200, 0, 0},
+	//Ready 460
+	{ 'N', 460,   0, 0,   0 },
+
+	//Dance1 650
+	{ 'R',  10,    0,   0,   -40 },
+	{ 'R', 640, 7200, 0, 0 },
 	{ 'F',  0,    0,   0,   0 },
 };
 
 Action right_shoulder_joints_action[] = {
-	{ 'R', 30,    0, 0,   -90 },
-	{ 'N', 100,   0, 0,   0 },
+	//Ready 460
+	{ 'R', 1,    0, 0,   -90 },
+	{ 'N', 459,   0, 0,   0 },
+
+	//Dance1 650
 	{ 'R', 30,   0, 0,   50 },
+	{ 'N', 620,   0, 0,   0 },
 	{ 'F',  0,    0,   0,   0 }
 };
 
 Action right_elbow_joints_action[] = {
-	{ 'N', 130,   0, 0,   0 },
+	//Ready 460
+	{ 'N', 460,   0, 0,   0 },
+
+	//Dance1 650
 	{ 'R', 30,   0, 0,   -90 },
+	{ 'N', 620,   0, 0,   0 },
+
 	{ 'F',  0,    0,   0,   0 }
 };
 
 Action left_leg_joints_action[] = {
+	//Ready 460
 	{ 'R', 30,    0, 0,   -10 },
-	
+	{ 'N', 430, 0, 0, 0},
+
+	//Dance1 650
+
 	{ 'F',  0,    0,   0,   0 }
 };
 
 Action left_knee_joints_action[] = {
-	{ 'N', 130,   0, 0,   0 },
+	//Ready 460
+	{ 'N', 460,   0, 0,   0 },
+	
+	//Dance1 650
 	{ 'R', 30,    40, 0,   0 },
 	{ 'F',  0,    0,   0,   0 }
 };
 
 
 Action right_leg_joints_action[] = {
+	//Ready 460
 	{ 'R',30,    0,   0,   10 },
-	{ 'N', 130,   0, 0,   0 },
+	{ 'N', 430,   0, 0,   0 },
+
+	//Dance1 650
 	{ 'R',30,    -30,   0,   0 },
+	{ 'N', 620,   0, 0,   0 },
 	{ 'F',  0,    0,   0,   0 }
 };
 
 Action right_knee_joints_action[] = {
-	{ 'N', 130,   0, 0,   0 },
+	//Ready
+	{ 'N', 460,   0, 0,   0 },
+
+	//Dance1 650
 	{ 'R', 30,    40,0,   0 },
 	{ 'R', 30,    -40,0,   0 },
 	{ 'R', 30,    40,0,   0 },
@@ -168,21 +213,21 @@ Action right_knee_joints_action[] = {
 	{ 'R', 30,    40,0,   0 },
 	{ 'R', 30,    -40,0,   0 },
 	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 30,    40,0,   0 },
+	{ 'R', 30,    -40,0,   0 },
+	{ 'R', 25,    40,0,   0 },
+	{ 'R', 25,    -40,0,   0 },
+
 
 	{ 'F',  0,    0,   0,   0 }
 
-	
+
 };
-
-
-
-//Action action4[] = {
-//	{ 'N',240,    0,   0,   0 },
-//	{ 'R', 60,  720,   0,   0 },
-//	{ 'N', 30,    0,   0,   0 },
-//	{ 'R', 60,    0, 720,   0 },
-//	{ 'F',  0,    0,   0,   0 }
-//};
 
 // ---------------------------------------------------------------------------------------------
 // Objects
@@ -211,6 +256,16 @@ int dwID;
 // ---------------------------------------------------------------------------------------------
 // Functions
 // ---------------------------------------------------------------------------------------------
+//void timer(int t)
+//{
+//	float timess = glutGet(GLUT_ELAPSED_TIME);
+//	//printf("timess : %f\n", timess);
+//	float deltaTime = timess - oldTimeSinceStart;
+//	oldTimeSinceStart = timess;
+//	printf("deletaTime : %f\n", deltaTime);
+//	glutPostRedisplay(); // call display function which is set by glutDisplayFunc.
+//	glutTimerFunc(delay, timer, t);
+//}
 
 void init()
 {
@@ -281,7 +336,7 @@ void init_left_arm() {
 	left_elbow_joints.trans[1] = 0;
 	left_elbow_joints.trans[2] = 0;
 	left_elbow_joints.type = TYPE_ELBOW_JOINTS;
-	
+
 	left_elbow_joints.action = &left_elbow_joints_action[0];
 	left_elbow_joints.action_idx = 0;
 	left_elbow_joints.action_counter = 0;
@@ -550,6 +605,19 @@ void init_object()
 
 void spin()
 {
+	sync_flag = 1;
+	
+	timess = glutGet(GLUT_ELAPSED_TIME);
+
+	deltaTime = timess - oldTimeSinceStart;
+
+	oldTimeSinceStart = timess;
+	
+	printf("delta : %f\n", deltaTime);
+
+	Sleep(4);
+
+	
 	glutPostRedisplay();
 }
 
@@ -708,14 +776,13 @@ void draw(Object* p)
 		gluCylinder(t, 0.12, 0.18, 0.7, 10, 10);
 		glPopMatrix();
 	}
-
 	else {
 		glVertexPointer(3, GL_FLOAT, 0, p->vertices);
 		glColorPointer(3, GL_FLOAT, 0, p->colors);
 		glDrawElements(GL_QUADS, p->nums, GL_UNSIGNED_BYTE, p->indices);
 	}
 	// apply action
-	if (play) action(p);
+	if (play && sync_flag) action(p);
 
 	// draw children
 	if (p->child) draw(p->child);
@@ -771,6 +838,7 @@ int main(int argc, char* argv[])
 
 	// call-back functions
 	glutIdleFunc(spin);
+	//glutTimerFunc(delay, timer, 0);
 	glutKeyboardFunc(keyboard_handler);
 	glutDisplayFunc(display);
 
