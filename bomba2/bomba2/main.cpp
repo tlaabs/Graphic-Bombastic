@@ -47,7 +47,7 @@ float timess = 0;
 
 //the array for texture
 // back,floor,left,right
-GLuint texture[4]; 
+GLuint texture[4];
 
 typedef struct _action
 {
@@ -1231,7 +1231,7 @@ void init()
 	//background-black
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glOrtho(-3.0, 3.0, -3.0, 3.0, -10.0, 10.0);
-	
+
 	glEnable(GL_DEPTH_TEST);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -1558,7 +1558,8 @@ void spin()
 
 	printf("delta : %f\n", deltaTime);
 
-	Sleep(16);
+	/////////
+	Sleep(13);
 
 
 	glutPostRedisplay();
@@ -1625,6 +1626,11 @@ void action(Object* p)
 	}
 }
 
+void color()
+{
+	glColor3f(1, 1, 1);
+}
+
 void draw(Object* p)
 {
 	// store matrix
@@ -1640,55 +1646,55 @@ void draw(Object* p)
 	if (p->type == TYPE_BODY) {
 		glPushMatrix();
 		glRotatef(-90.0, 1, 0, 0);
-		glColor3f(1, 0, 0);
+		color();
 		gluCylinder(t, 0.3, 0.4, 1.4, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_HEAD) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glutSolidSphere(0.3, 10, 10);
-		glColor3f(1, 1, 0);
+		glColor3f(0, 0, 0);
 		glRotatef(-5.0, 1, 0, 0);
 		glutSolidCone(0.2, 0.5, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_BIG_JOINTS) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glutSolidSphere(0.2, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_LEFT_LOWER_ARM) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glRotatef(-90.0, 0, 1, 0);
 		gluCylinder(t, 0.14, 0.13, 0.8, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_RIGHT_LOWER_ARM) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glRotatef(90.0, 0, 1, 0);
 		gluCylinder(t, 0.14, 0.13, 0.8, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_ELBOW_JOINTS) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glutSolidSphere(0.18, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_LEFT_UPPER_ARM) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glRotatef(-90.0, 0, 1, 0);
 		gluCylinder(t, 0.12, 0.11, 0.4, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_RIGHT_UPPER_ARM) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glRotatef(90.0, 0, 1, 0);
 		gluCylinder(t, 0.12, 0.11, 0.4, 10, 10);
 		glPopMatrix();
@@ -1696,26 +1702,26 @@ void draw(Object* p)
 	//��
 	else if (p->type == TYPE_PALM) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glutSolidSphere(0.17, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_LEG_KNEE_JOINTS) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glutSolidSphere(0.2, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_UPPER_LEG) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glRotatef(90.0, 1, 0, 0);
 		gluCylinder(t, 0.14, 0.13, 0.8, 10, 10);
 		glPopMatrix();
 	}
 	else if (p->type == TYPE_LOWER_LEG) {
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		color();
 		glRotatef(90.0, 1, 0, 0);
 		gluCylinder(t, 0.12, 0.18, 0.7, 10, 10);
 		glPopMatrix();
@@ -1765,16 +1771,16 @@ void display()
 	//�߰�
 	glEnable(GL_TEXTURE_2D);
 	//�߰�
-	
+
 	gluLookAt(v.eye[0], v.eye[1], v.eye[2], v.at[0], v.at[1], v.at[2], v.up[0], v.up[1], v.up[2]);
-	
+
 
 	//�߰�
 	glTranslatef(0.0, 0.0, 10);
 	square();
 	glColor3f(1, 1, 1);
 	glDisable(GL_TEXTURE_2D);
-	glTranslatef(0.0, -0.9, 0.0);
+	glTranslatef(-0.1, -0.6, 0.0);
 
 	// draw
 	draw(&body);
@@ -1800,22 +1806,22 @@ GLuint LoadTexture(const char * filename, int width, int height)
 	glBindTexture(GL_TEXTURE_2D, texture); //bind the texture to it��s array 
 
 
-	
+
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL); //set texture environment parameters 
 
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
+
 
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	
+
 
 	//Generate the texture 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, g_cImg.getRGB());
-	
-	
+
+
 	return texture; //return whether it was successfull 
 
 }
@@ -1825,8 +1831,8 @@ int main(int argc, char* argv[])
 {
 
 	//PlaySound(TEXT(SOUND_FILE_NAME), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
-	mciOpen.lpstrElementName = L".\\bom.mp3"; // ���� ��� �Է�
-	mciOpen.lpstrDeviceType = L"mpegvideo";  
+	mciOpen.lpstrElementName = ".\\bom.mp3";
+	mciOpen.lpstrDeviceType = "mpegvideo";
 	mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
 		(DWORD)(LPVOID)&mciOpen);
 
@@ -1835,12 +1841,12 @@ int main(int argc, char* argv[])
 	// GLUT initialization
 	glutInit(&argc, (char**)argv);
 
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB |GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(500, 500);
 
 	glutCreateWindow("Bombastic");
-	
- 
+
+
 	// call-back functions
 	glutIdleFunc(spin);
 	//glutTimerFunc(delay, timer, 0);
@@ -1862,13 +1868,10 @@ int main(int argc, char* argv[])
 	init();
 
 	// top,floor,left,right
-	//texture[3] = LoadTexture("side.bmp", 640, 480);      //left
-	//texture[2] = LoadTexture("tex3df.bmp", 640, 480);      //right 
-	//texture[1] = LoadTexture("wood2.bmp", 300, 161);      //floor 
-	texture[0] = LoadTexture("curtain2.bmp", 435, 348);      //top    
-	//texture[0] = LoadTexture("input.bmp", 895, 387);      //top 
-	//texture[0] = LoadTexture("curtain8.bmp", 330, 348);      //top    
-
+	//texture[0] = LoadTexture("back.bmp", 1000 , 839);        
+	//texture[0] = LoadTexture("curtain4.bmp", 480 ,360); 
+	//texture[0] = LoadTexture("light.bmp", 1000, 1000);   
+	texture[0] = LoadTexture("light3.bmp",928,987);
 	glutMainLoop();
 
 	return 0;
@@ -1883,47 +1886,11 @@ void square(void) {
 
 	glBegin(GL_QUADS);
 
-
 	glTexCoord2f(0.0, 0.0); glVertex3f(-3, -3, -5);
 	glTexCoord2f(0.0, 1.0); glVertex3f(-3, 3, -5);
 	glTexCoord2f(1.0, 1.0); glVertex3f(3, 3, -5);
 	glTexCoord2f(1.0, 0.0); glVertex3f(3, -3, -5);
 	glEnd();
-
-
-	////right 
-	//glBindTexture(GL_TEXTURE_2D, texture[2]); //bind our texture to our shape 
-	//glBegin(GL_QUADS);
-
-	//glTexCoord2f(0.0, 0.0); glVertex3f(2.0, 2.0, 2.0);
-	//glTexCoord2f(0.0, 1.0); glVertex3f(3, 3, -2.0);
-	//glTexCoord2f(1.0, 1.0); glVertex3f(3, -3, -2.0);
-	//glTexCoord2f(1.0, 0.0); glVertex3f(2, -1.5, 2.0);
-
-	//glEnd();
-	////left
-	//glBindTexture(GL_TEXTURE_2D, texture[3]); //bind our texture to our shape 
-
-	//glBegin(GL_QUADS);
-
-	//glTexCoord2f(0.0, 0.0); glVertex3f(-3.0, -3.0, -2.0);
-	//glTexCoord2f(0.0, 1.0); glVertex3f(-2.0, -1.5, 2.0);
-	//glTexCoord2f(1.0, 1.0); glVertex3f(-2.0, 2.0, 2.0);
-	//glTexCoord2f(1.0, 0.0); glVertex3f(-3.0, 3.0, -2.0);
-
-	//glEnd();
-
-	////floor
-	//glBindTexture(GL_TEXTURE_2D, texture[1]); //bind our texture to our shape 
-
-	//glBegin(GL_QUADS);
-
-	//glTexCoord2f(0.0, 0.0); glVertex3f(-3.0, -3.0, -2.0);
-	//glTexCoord2f(0.0, 1.0); glVertex3f(3, -3, -2.0);
-	//glTexCoord2f(1.0, 1.0); glVertex3f(2, -1.5, 2.0);
-	//glTexCoord2f(1.0, 0.0); glVertex3f(-2, -1.5, 2.0);
-
-	//glEnd();
 
 	glPopMatrix();
 

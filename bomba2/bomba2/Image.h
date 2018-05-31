@@ -1,3 +1,4 @@
+#pragma once
 // ------------------------------------------------------------------------------------------------
 // Image class Header file
 // ------------------------------------------------------------------------------------------------
@@ -55,7 +56,7 @@ public:
 	int   getHeight() { return m_iHeight; }
 	byte* getRGB() { return m_pRGB; }
 	void setRGB(byte* RGB) { m_pRGB = RGB; } // add setRGB
-	// get/set functions
+											 // get/set functions
 	int   getAddr(int x, int y)
 	{
 		return y * m_iWidth * 3 + x * 3;
