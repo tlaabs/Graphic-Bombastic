@@ -6,13 +6,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <glut.h>
-#include <Windows.h>
-#include <mmsystem.h>   
+#include <Windows.h>  
 #include <Digitalv.h>
 #include "Image.h"
-#pragma comment(lib, "winmm.lib")
 
-#define SOUND_FILE_NAME ".\\bgm.wav"
 
 // ---------------------------------------------------------------------------------------------
 // Type definition
@@ -44,6 +41,7 @@ void stopSound();
 // back,floor,left,right
 GLuint texture[4];
 int delay;
+int map;
 
 typedef struct _action
 {
@@ -1487,6 +1485,15 @@ void init_object()
 
 	body.theta[0] = body.theta[1] = body.theta[2] = 0;
 	body.trans[0] = body.trans[1] = body.trans[2] = 0;
+	switch (map)
+	{
+	case 2:
+		body.trans[1] = -0.7;
+		break;
+	case 3:
+		body.trans[1] = -0.6;
+		break;
+	}
 
 	body.action = &body_action[0];
 	body.action_idx = 0;
@@ -1711,9 +1718,6 @@ void FreeTexture(GLuint texture)
 	glDeleteTextures(1, &texture);
 }
 
-
-
-
 void display()
 {
 	// clear background
@@ -1784,6 +1788,15 @@ int main(int argc, char* argv[])
 {
 	printf("Sync delay (ms) : ");
 	scanf("%d", &delay);
+	printf("============ BG ===============\n");
+	printf("= 1. Solo light               =\n");
+	printf("= 2. Red curtain              =\n");
+	printf("= 3. Red carpet               =\n");
+	printf("===============================\n");
+	printf("Input : ");
+	scanf("%d", &map);
+
+
 	mciOpen.lpstrElementName = L".\\bom.mp3";
 	mciOpen.lpstrDeviceType = L"mpegvideo";
 	mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
@@ -1819,8 +1832,20 @@ int main(int argc, char* argv[])
 	v.up[0] = 0.0; v.up[1] = 1.0; v.up[2] = 0.0;
 	gluLookAt(v.eye[0], v.eye[1], v.eye[2], v.at[0], v.at[1], v.at[2], v.up[0], v.up[1], v.up[2]);
 	init();
- 
-	texture[0] = LoadTexture("light3.bmp", 928, 987);
+
+	switch (map)
+	{
+	case 1:
+		texture[0] = LoadTexture("solo_light.bmp", 928, 987);
+		break;
+	case 2:
+		texture[0] = LoadTexture("red_curtain.bmp", 420, 336);
+		break;
+	case 3:
+		texture[0] = LoadTexture("red_carpet.bmp", 1000, 807);
+		break;
+	}
+
 	glutMainLoop();
 
 	return 0;
